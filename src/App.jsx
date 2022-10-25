@@ -17,7 +17,34 @@ class App extends Component {
     filter: '',
   };
 
-  addContact = newContact => {
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contacts);
+
+    if (parsedContacts) {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const nextContacts = this.state.contacts;
+    const prevContacts = prevState.contacts;
+
+    if (nextContacts !== prevContacts) {
+      localStorage.setItem('contacts', JSON.stringify(nextContacts));
+    }
+  }
+
+  addContact = data => {
+    const normalizedName = data.name.toLowerCase();
+    const uniqId = Date.now().toString();
+
+    const newContact = {
+      id: uniqId,
+      name: normalizedName,
+      number: data.number,
+    };
+
     const duplicateName = this.state.contacts.find(
       contact => contact.name === newContact.name
     );
@@ -47,9 +74,13 @@ class App extends Component {
   };
 
   deleteContact = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
+    const answer = window.confirm('Want to delete?');
+
+    if (answer) {
+      this.setState(prevState => ({
+        contacts: prevState.contacts.filter(contact => contact.id !== id),
+      }));
+    }
   };
 
   render() {
